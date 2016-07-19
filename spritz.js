@@ -1,146 +1,33 @@
 // spritz.js
-// A JavaScript Speed Reader
-// rich@gun.io
-// https://github.com/Miserlou/OpenSpritz
 
-// Please don't abuse this.
-var readability_token = '172b057cd7cfccf27b60a36f16b1acde12783893';
-var diffbot_token = '2efef432c72b5a923408e04353c39a7c';
 
+/*
+Generate a spritz
+*/
 function create_spritz(){
+    var spritzContainer = document.getElementById("spritz_container");
 
-     spritz_loader = function() {
-        //getURL("https://rawgithub.com/Miserlou/OpenSpritz/master/spritz.html", function(data){
+    clearTimeouts();
 
-        //getURL("https://rawgithub.com/Miserlou/OpenSpritz/dev/spritz.html", function(data){
-
-        // This won't work in Firefox because an old bug and won't work in Chrome because of security stuff:
-        //getURL("spritz.html", function(data){
-
-        //getURL("https://rawgithub.com/Miserlou/OpenSpritz/dev/spritz.html", function(data){
-
-        // RawGit's CDN usage:
-        // "Since files are not refreshed after the first request,
-        // it's best to use a specific tag or commit URL, not a branch URL."
-        getURL("https://cdn.rawgit.com/Miserlou/OpenSpritz/9e92c605032be16c986ed699d68e0acd3534e6b1/spritz.html", function(data){
-            var spritzContainer = document.getElementById("spritz_container");
-
-            if (!spritzContainer) {
-                var ele = document.createElement("div");
-                data = data.replace(/(\r\n|\n|\r)/gm,"");
-                ele.innerHTML = data;
-                document.body.insertBefore(ele, document.body.firstChild);
-                document.getElementById("spritz_toggle").style.display = "none";
-            };
-
-            document.getElementById("spritz_selector").addEventListener("change", function(e) {
-                clearTimeouts();
-                spritz();
-            });
-        });
-    };
-
-    spritz_loader();
+    // Selection- want to make this array of objects later
+    var selection = "If you look up 'tea' —  in the first cookery book that comes to hand you will probably find that it is unmentioned; or at most you will find a few lines of sketchy instructions which give no ruling on several of the most important points. This is curious, not only because tea is one of the main stays of civilization in this country, as well as in Eire, Australia and New Zealand, but because the best manner of making it is the subject of violent disputes. When I look through my own recipe for the perfect cup of tea, I find no fewer than eleven outstanding points. On perhaps two of them there would be pretty general agreement, but at least four others are acutely controversial. Here are my own eleven rules, every one of which I regard as golden: First of all, one should use Indian or Ceylonese tea. China tea has virtues which are not to be despised nowadays — it is economical, and one can drink it without milk — but there is not much stimulation in it. One does not feel wiser, braver or more optimistic after drinking it. Anyone who has used that comforting phrase 'a nice cup of tea' invariably means Indian tea. Secondly, tea should be made in small quantities — that is, in a teapot. Tea out of an urn is always tasteless, while army tea, made in a cauldron, tastes of grease and whitewash. The teapot should be made of china or earthenware. Silver or Britanniaware teapots produce inferior tea and enamel pots are worse; though curiously enough a pewter teapot (a rarity nowadays) is not so bad. Thirdly, the pot should be warmed beforehand. This is better done by placing it on the hob than by the usual method of swilling it out with hot water. Fo"
+    spritzify(selection);
 }
 
-function getURL(url, callback) {
-    var xmlhttp = new XMLHttpRequest();
-
-    xmlhttp.onreadystatechange = function() {
-        if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-            callback(xmlhttp.responseText);
-        }
-    }
-
-    xmlhttp.open("GET", url, true);
-    xmlhttp.send();
-}
-
-function hide_spritz(){
-    document.getElementById("spritz_spacer").style.display = "none";
-    document.getElementById("spritz_container").style.display = "none";
-    document.getElementById("spritz_holder").style.display = "none";
-}
-
-// Entry point to the beef.
-// Gets the WPM and the selected text, if any.
-function spritz(){
-
-    var wpm = parseInt(document.getElementById("spritz_selector").value, 10);
-    if(wpm < 1){
-        return;
-    }
-
-    var selection = getSelectionText();
-    if(selection){
-        spritzify(selection);
-    }
-    else{
-        spritzifyURL();
-    }
-}
 
 // The meat!
 function spritzify(input){
 
-    var wpm = parseInt(document.getElementById("spritz_selector").value, 10);
-    var ms_per_word = 60000/wpm;
-
-    // Split on any spaces.
-    var all_words = input.split(/\s+/);
-
-    // The reader won't stop if the selection starts or ends with spaces
-    if (all_words[0] == "")
-    {
-        all_words = all_words.slice(1, all_words.length);
-    }
-
-    if (all_words[all_words.length - 1] == "")
-    {
-        all_words = all_words.slice(0, all_words.length - 1);
-    }
-
-    var word = '';
-    var result = '';
-
-    // Preprocess words
-    var temp_words = all_words.slice(0); // copy Array
-    var t = 0;
-
-    for (var i=0; i<all_words.length; i++){
-
-        if(all_words[i].indexOf('.') != -1){
-            temp_words[t] = all_words[i].replace('.', '&#8226;');
-        }
-
-        // Double up on long words and words with commas.
-        if((all_words[i].indexOf(',') != -1 || all_words[i].indexOf(':') != -1 || all_words[i].indexOf('-') != -1 || all_words[i].indexOf('(') != -1|| all_words[i].length > 8) && all_words[i].indexOf('.') == -1){
-            temp_words.splice(t+1, 0, all_words[i]);
-            temp_words.splice(t+1, 0, all_words[i]);
-            t++;
-            t++;
-        }
-
-        // Add an additional space after punctuation.
-        if(all_words[i].indexOf('.') != -1 || all_words[i].indexOf('!') != -1 || all_words[i].indexOf('?') != -1 || all_words[i].indexOf(':') != -1 || all_words[i].indexOf(';') != -1|| all_words[i].indexOf(')') != -1){
-            temp_words.splice(t+1, 0, " ");
-            temp_words.splice(t+1, 0, " ");
-            temp_words.splice(t+1, 0, " ");
-            t++;
-            t++;
-            t++;
-        }
-
-        t++;
-
-    }
-
-    all_words = temp_words.slice(0);
+    var all_words = preprocess(input);
 
     var currentWord = 0;
-    var running = true;
+    var running = false;
     var spritz_timers = new Array();
 
+
+    /*
+    Event Listeners
+    */
     document.getElementById("spritz_toggle").addEventListener("click", function() {
         if(running) {
             stopSpritz();
@@ -149,17 +36,58 @@ function spritzify(input){
         }
     });
 
-    function updateValues(i) {
 
+    window.addEventListener("keydown", function (event) {
+        if (event.defaultPrevented) {
+            return; // Should do nothing if the key event was already consumed.
+        }
+
+        switch (event.key) {
+            case "ArrowDown":
+                console.log("Summary");
+                break;
+            case "ArrowUp":
+                console.log("exit summary");
+                break;
+            case "ArrowLeft":
+                console.log("back");
+                break;
+            case "ArrowRight":
+                console.log("forward");
+                break;
+            case "Enter":
+                if(running) {
+                    stopSpritz();
+                } else {
+                    startSpritz();
+                }
+                break;
+            case "Escape":
+                console.log("restart");
+                break;
+            default:
+                return; 
+        }
+        event.preventDefault();
+    }, true);
+
+    /*
+    Prints the word to the element spritz_result
+    */
+    function updateValues(i) {
         var p = pivot(all_words[i]);
         document.getElementById("spritz_result").innerHTML = p;
-        currentWord = i;
-
     }
 
+    /*
+    Start spritzing
+    */
     function startSpritz() {
 
-        document.getElementById("spritz_toggle").style.display = "block";
+
+        var wpm = parseInt(document.getElementById("spritz_selector").value, 10);
+        if(wpm == 0) return;
+        var ms_per_word = 60000/wpm;
         document.getElementById("spritz_toggle").textContent = "Pause";
 
         running = true;
@@ -174,16 +102,17 @@ function spritzify(input){
         }, ms_per_word));
     }
 
+    /*
+    Pause
+    */
     function stopSpritz() {
         for(var i = 0; i < spritz_timers.length; i++) {
-            clearTimeout(spritz_timers[i]);
+            clearInterval(spritz_timers[i]);
         }
-
         document.getElementById("spritz_toggle").textContent = "Play";
         running = false;
     }
 
-    startSpritz();
 }
 
 // Find the red-character of the current word.
@@ -223,6 +152,8 @@ function pivot(word){
     var end = word.slice(bestLetter, length).replace('.', '&#8226;') + '.'.repeat((11-(word.length-bestLetter)));
 
     var result;
+    if(middle===" ") middle = ".";
+    if(middle==="—") middle = "-";
     result = "<span class='spritz_start'>" + start;
     result = result + "</span><span class='spritz_pivot'>";
     result = result + middle;
@@ -235,73 +166,57 @@ function pivot(word){
     return result;
 }
 
-// Get the currently selected text, if any.
-// Shameless pinched from StackOverflow.
-function getSelectionText() {
-    var text = "";
-    if (typeof window.getSelection != "undefined") {
-        var sel = window.getSelection();
-        if (sel.rangeCount) {
-            var container = document.createElement("div");
-            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-                container.appendChild(sel.getRangeAt(i).cloneContents());
-            }
-            text = container.innerText || container.textContent;
+function preprocess(input) {
+    var all_words = input.split(/\s+/);
+
+    // The reader won't stop if the selection starts or ends with spaces
+    if (all_words[0] == "")
+    {
+        all_words = all_words.slice(1, all_words.length);
+    }
+
+    if (all_words[all_words.length - 1] == "")
+    {
+        all_words = all_words.slice(0, all_words.length - 1);
+    }
+
+    var word = '';
+    var result = '';
+
+    // Preprocess words
+    var temp_words = all_words.slice(0); // copy Array
+    var t = 0;
+
+    for (var i=0; i<all_words.length; i++){
+
+        if(all_words[i].indexOf('.') != -1){
+            temp_words[t] = all_words[i].replace('.', '&#8226;');
         }
-    } else if (typeof document.selection != "undefined") {
-        if (document.selection.type == "Text") {
-            text = document.selection.createRange().text;
+
+        // Double up on long words and words with commas.
+        if((all_words[i].indexOf(',') != -1 || all_words[i].indexOf(':') != -1 || all_words[i].indexOf('-') != -1 || all_words[i].indexOf('(') != -1) && all_words[i].indexOf('.') == -1){
+            temp_words.splice(t+1, 0, all_words[i]);
+            temp_words.splice(t+1, 0, all_words[i]);
+            t++;
+            t++;
         }
+
+        // Add an additional space after punctuation.
+        if(all_words[i].indexOf('.') != -1 || all_words[i].indexOf('!') != -1 || all_words[i].indexOf('?') != -1 || all_words[i].indexOf(':') != -1 || all_words[i].indexOf(';') != -1|| all_words[i].indexOf(')') != -1){
+            temp_words.splice(t+1, 0, " ");
+            temp_words.splice(t+1, 0, " ");
+            temp_words.splice(t+1, 0, " ");
+            t++;
+            t++;
+            t++;
+        }
+
+        t++;
+
     }
-    if(text === ""){
-        return false;
-    }
-    else{
-        return text;
-    }
-}
 
-// Uses the Readability API to get the juicy content of the current page.
-function spritzifyURL(){
-    var url = document.URL;
-
-    //getURL("https://www.readability.com/api/content/v1/parser?url="+ encodeURIComponent(url) +"&token=" + readability_token +"&callback=?",
-    getURL("https://api.diffbot.com/v2/article?url="+ encodeURIComponent(url) +"&token=" + diffbot_token, // +"&callback=?",
-        function(data) {
-
-            data = JSON.parse(data);
-
-            if(data.error){
-                document.getElementById("spritz_result").innerText = "Article extraction failed. Try selecting text instead.";
-                return;
-            }
-
-            var title = '';
-            if(data.title !== ""){
-                title = data.title + ". ";
-            }
-
-            var author = '';
-            if(data.author !== undefined){
-                author = "By " + data.author + ". ";
-            }
-
-            var body = data.text;
-            body = body.trim(); // Trim trailing and leading whitespace.
-            body = body.replace(/\s+/g, ' '); // Shrink long whitespaces.
-
-            var text_content = title + author + body;
-            text_content = text_content.replace(/\./g, '. '); // Make sure punctuation is apprpriately spaced.
-            text_content = text_content.replace(/\?/g, '? ');
-            text_content = text_content.replace(/\!/g, '! ');
-            spritzify(text_content);
-        });
-
-}
-
-//////
-// Helpers
-//////
+    return temp_words.slice(0);
+};
 
 // This is a hack using the fact that browers sequentially id the timers.
 function clearTimeouts(){
@@ -328,5 +243,7 @@ function decodeEntities(s){
     temp=null;
     return str;
 }
+
+
 
 

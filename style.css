@@ -1,32 +1,23 @@
 body{
     margin: 0px;
+    position: relative;
 }
 
 #spritz_holder{
-
-    box-shadow: 2px 2px 4px rgba(0, 0, 0, .2);
-    background-color: #ffffff;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
     position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 99999999999999999;
-    /* 600px+; small tablet portrait */
     width: 100%;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    margin-bottom: 12px;
-    min-height: 166px;
 }
 
 #spritz_spacer{
     width: 100%;
-    /* 600px+; small tablet portrait */
     min-height: 210px;
 }
 
 #spritz_container{
     background-color: #ffffff;
-    /* 600px+; small tablet portrait */
     width: 420px;
     margin-left: auto;
     margin-right: auto;
@@ -80,8 +71,13 @@ body{
 
 .invisible{
     font-family: 'Droid Sans Mono', sans-serif;
-    color: #ffffff;
+    visibility: hidden;
     position: static;
+}
+
+#top_bar {
+    font-size: 30px;
+    height: 30px;
 }
 
 .start, .pivot, .end, .spritz_start, .spritz_pivot, .spritz_end{
