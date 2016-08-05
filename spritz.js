@@ -28,7 +28,7 @@ function create_spritz(){
     // var selection = " pewter teapot (a rarity nowadays) is not so bad. Thirdly, the pot should be warmed beforehand. This is better done by placing it on the hob than by the usual method of swilling it out with hot water. Fo"
     
     var news_container = [];
-    var base_obj = {title:"Start",color:"#ff",summary:null,link:null};
+    var base_obj = {title:"Start",color:"#ffffff",summary:null,link:null};
     // var news_obj = {title:"First firstss firstee firstww",summary:"FIRRST FIRST FIRRSST FIIIRST FIRRRTTS",link:"http://first.com"};
     // var news_obj_2 = {title:"Second secondd seoncid secondd secondd",summary:"SECOND SECOFF SECONN SECCNDN SECOON",link:"http://second.com"};
     // var news_obj_3 = {title:"Third thirdd thieii thiiidf third",summary:"HIIDD THIIRRDDD THIRDDDD THIRDD",link:"http://third.com"};
@@ -52,7 +52,7 @@ function spritzify(news_container){
     var running = false;
     var spritz_timers = new Array();
     var previous_obj_var = 3; // if previous is hit and the current_word is less than this number go to the previous news_obj
-
+    var repeat_count = 0;
 
     /*
     Event Listeners
@@ -107,10 +107,10 @@ function spritzify(news_container){
     /*
     Start spritzing
     */
-    function startSpritz() {
+    function startSpritz(input_wpm) {
 
 
-        var wpm = parseInt(document.getElementById("spritz_selector").value, 10);
+        var wpm = input_wpm || parseInt(document.getElementById("spritz_selector").value, 10);
         if(wpm == 0) return;
         var ms_per_word = 60000/wpm;
         document.getElementById("spritz_toggle").textContent = "Pause";
@@ -118,7 +118,7 @@ function spritzify(news_container){
         running = true;
 
         spritz_timers.push(setInterval(function() {
-
+            console.log("Repeat count" + repeat_count);
             updateValues(current_word,current_news_object,title_summary_var);
             current_word++;
             if(current_word >= news_container[current_news_object][title_summary_var].length) {
@@ -152,6 +152,7 @@ function spritzify(news_container){
                 console.log("Summary");
                 switchToSummary();
                 current_word = 0;
+                if(repeat_count != 0) resetSpeed();
             }
         }
     }
@@ -162,11 +163,13 @@ function spritzify(news_container){
                 console.log("exit summary");
                 switchToTitle();
                 goForward();
+                if(repeat_count != 0) resetSpeed();
             }
         }
     }
 
     function goBack() {
+
         if(running) {
             if(title_summary_var === "title") {
                 // If current word is less previous_obj_var then go to the previous news_obj
@@ -176,19 +179,22 @@ function spritzify(news_container){
                         console.log("back an object");
                         decrementCurObject();
                         current_word = 0;
+                        resetSpeed();
                     } else {
                         console.log("back");
                         // redo the current news_obj
                         current_word = 0;
-                        // todo make slower the second pass
+                        incrementRepeatCount();
                     }
                 }else {
                     console.log("back");
+                    incrementRepeatCount();
                     // redo the current news_obj
                     current_word = 0;
                 }
             } else {
                 console.log("back");
+                incrementRepeatCount();
                 // in summary only allow to start over
                 current_word = 0;
             }                    
@@ -197,16 +203,19 @@ function spritzify(news_container){
 
     function goForward() {
         if(running) {
-            current_word = 0;
+            if(repeat_count != 0) resetSpeed();
+            
             // for summary dont allow to skip
             if(title_summary_var === "title") {
-
+                current_word = 0;
                 // only allow skip if not the last or second to last news object
                 if(current_news_object < news_container.length) {
                     console.log("forward");
                     incrementCurObject();
                 } 
-            }                     
+            } else {
+                resetSpeed();
+            }                    
         }
     }
 
@@ -225,6 +234,7 @@ function spritzify(news_container){
         }
     }
     function incrementCurObject() {
+        resetSpeed();
         current_news_object ++;
         if(current_news_object >= news_container.length){
             console.log("cur greater");
@@ -233,9 +243,8 @@ function spritzify(news_container){
             current_word = 0;
             switchToTitle();
             stopSpritz();
-            return;
+            current_news_object = 0;
         }
-        console.log("increment news object");
         console.log(news_container[current_news_object]["color"]);
         document.body.style.backgroundColor = news_container[current_news_object]["color"];
     }
@@ -252,6 +261,26 @@ function spritzify(news_container){
             );
         title_summary_var = "summary";
     }
+    function incrementRepeatCount() {
+        if(repeat_count < 1) {
+            repeat_count ++;
+        }
+        slowDown();
+    }
+    function slowDown() {
+        stopSpritz();
+        var wpm = parseInt(document.getElementById("spritz_selector").value, 10);
+        var wpm_map_slow = {200:180, 300:200, 350:270, 400:330, 450:380, 500:400, 550:460, 600:500, 650:510, 700:500, 750:580, 800:610, 850:640, 900: 690, 950:700};
+        var slow_wpm = wpm_map_slow[wpm];
+        startSpritz(slow_wpm);
+    }
+    function resetSpeed() {
+        repeat_count = 0;
+        stopSpritz();
+        startSpritz();
+    }
+
+
 
 }
 
